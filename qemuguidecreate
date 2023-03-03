@@ -1,0 +1,25 @@
+#!/bin/bash
+cd ~/qemu_vms
+echo "Please create a virtual disk at first."
+echo "Enter the name and size(GB) of the virtual machine"
+read respuesta1
+read respuesta2
+respuesta1=$respuesta1""
+respuesta2=$respuesta2""
+mkdir $respuesta1
+cd $respuesta1
+qemu-img create "$respuesta1".img "$respuesta2"G
+#echo "Executing "qemu-img create "$respuesta1".img" "$respuesta"G"""
+echo "Please enter the location of the iso image"
+read respuesta3
+respuesta3=$respuesta3""
+echo "Pleasw enter RAM size (MB) of the virtual machine"
+read res
+res=$res""
+echo "A virtual machine is created successfully, do you want to continue? (y/n)"
+read respuesta4
+respuesta4=$respuesta4"_"
+if [ "$respuesta4" == "y_" ]; then
+	qemu-system-x86_64 -m $res -hda "$respuesta1".img -cdrom "$respuesta3" -boot d -enable-kvm
+fi
+

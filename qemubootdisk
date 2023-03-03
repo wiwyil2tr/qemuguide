@@ -1,0 +1,12 @@
+#!/bin/bash
+cd ~/qemu_vms
+echo "Enter the devicce that you want to boot from (e.g. from USB to test bootable medium)"
+read r1
+r1=$r1""
+echo "Enter the RAM of the virtual machine"
+read r2
+r2=$r2""
+qemu-system-x86_64 -m $r2 -hda $r1
+
+
+

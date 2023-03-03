@@ -1,0 +1,27 @@
+#!/bin/bash
+cd ~/qemu_vms
+ls
+echo "Enter the name of the machine that you want to boot"
+read r1
+r1=$r1""
+cd $r1
+echo "do you need to boot with a ISO image(y/n)"
+read r2
+r2=$r2""
+if [ "$r2" == "y" ] ; then
+	echo "Enter the location of the ISO image"
+	read r3
+	r3=$r3""
+	echo "Enter the RAM (MB) of the virtual machine"
+	read r4
+	r4=$r4""
+	qemu-system-x86_64 -m $r4 -hda $r1.img -cdrom $r3 -boot d -enable-kvm
+else
+	echo "Enter the RAM (MB) of the virtual machine"
+	read r5
+	r5=$r5""
+	qemu-system-x86_64 -m $r5 -hda $r1.img
+fi
+
+
+
