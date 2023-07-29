@@ -8,7 +8,7 @@ echo "Do you want to continue (y/n)."
 read r
 r=$r""
 if [ "$r" == "y" ]; then
-rm /usr/bin/qemubootdisk /usr/bin/qemubootexisting /usr/bin/qemuguide /usr/bin/qemuguidecreate
+rm /usr/bin/qemudelete /usr/bin/qemubootdisk /usr/bin/qemubootexisting /usr/bin/qemuguide /usr/bin/qemuguidecreate
 echo "Uninstallation Completed"
 exit 0			 
 else

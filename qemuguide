@@ -3,13 +3,14 @@ set -u
 set -e
 echo "preparing"
 #mkdir qemu_vms
-sleep 1
+#sleep 1
 clear
 echo "Welcome to use QEMU Guide"
 echo "Please choose a task"
 echo "1. Create a new virtual machine"
 echo "2. Boot an existing virtual machine"
-echo "3. boot a system that is on a physical device"
+echo "3. Boot a system that is on a physical device"
+echo "4. Remove a virtual machine"
 read r1
 r1=$r1"_"
 if [ "$r1" == "1_" ] ; then
@@ -18,10 +19,12 @@ if [ "$r1" == "1_" ] ; then
 	qemubootexisting
 	else if [ "$r1" == "3_" ] ; then
 	qemubootdisk
+    else if [ "$r1" == "4_" ] ; then
+	qemudelete
 else 
 	echo "Command not found"
 fi
 	fi
 fi
-
+fi
 

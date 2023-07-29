@@ -1,0 +1,29 @@
+#!/bin/bash
+set -u
+set -e
+cd ~/qemu_vms
+ls
+echo "Input the virtual machine to remove (THIS OPERATION CANNOT BE UNDONE!!!)"
+echo "Then press Enter if you really want to delete this virtual machine"
+read r1
+r1=$r1""
+read -r -p "Are You Sure? [Y/n] " input
+case $input in
+    [yY][eE][sS]|[yY])
+                rm -r $r1
+                ;;
+
+    [nN][oO]|[nN])
+                echo "No"
+        ;;
+
+    *)
+                echo "Invalid input..."
+                exit 1
+                ;;
+esac
+
+
+
+
+

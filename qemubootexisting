@@ -20,7 +20,7 @@ else
 	echo "Enter the RAM (MB) of the virtual machine"
 	read r5
 	r5=$r5""
-	qemu-system-x86_64 -m $r5 -hda $r1.img
+	qemu-system-x86_64 -m $r5 -hda $r1.qcow2
 fi
 
 

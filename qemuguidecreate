@@ -11,8 +11,10 @@ NC='\033[0m'
 if ! command -v qemu-system-x86_64 &> /dev/null; then
   echo -e "${RED}qemu is not installed. Please install it first.${NC}"
   exit 1
-cd ~/qemu_vms
+fi
+
 # print a welcome message and instructions
+cd ~/qemu_vms
 echo -e "${GREEN}Welcome to qemuguide, a simple wizard for using qemu virtual machine software.${NC}"
 echo -e "${YELLOW}Please follow the prompts and enter your choices.${NC}"
 
@@ -27,6 +29,7 @@ if [ "$diskpath" == "new" ]; then
   read -p "Enter the size of your disk image file (e.g. 10G): " disksize
 
   # create a new disk image file using qemu-img command
+  mkdir ~/qemu_vms/$vmname
   qemu-img create -f qcow2 $vmname.qcow2 $disksize
 
   # set the disk path to the newly created file
@@ -124,3 +127,4 @@ else
   echo -e "${YELLOW}Okay, maybe next time. Goodbye!${NC}"
   exit 0
 fi
+
