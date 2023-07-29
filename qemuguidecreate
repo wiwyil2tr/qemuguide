@@ -11,8 +11,7 @@ NC='\033[0m'
 if ! command -v qemu-system-x86_64 &> /dev/null; then
   echo -e "${RED}qemu is not installed. Please install it first.${NC}"
   exit 1
-fi
-
+cd ~/qemu_vms
 # print a welcome message and instructions
 echo -e "${GREEN}Welcome to qemuguide, a simple wizard for using qemu virtual machine software.${NC}"
 echo -e "${YELLOW}Please follow the prompts and enter your choices.${NC}"
