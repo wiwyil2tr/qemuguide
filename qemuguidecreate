@@ -1,25 +1,127 @@
 #!/bin/bash
-cd ~/qemu_vms
-echo "Please create a virtual disk at first."
-echo "Enter the name and size(GB) of the virtual machine"
-read respuesta1
-read respuesta2
-respuesta1=$respuesta1""
-respuesta2=$respuesta2""
-mkdir $respuesta1
-cd $respuesta1
-qemu-img create "$respuesta1".img "$respuesta2"G
-#echo "Executing "qemu-img create "$respuesta1".img" "$respuesta"G"""
-echo "Please enter the location of the iso image"
-read respuesta3
-respuesta3=$respuesta3""
-echo "Pleasw enter RAM size (MB) of the virtual machine"
-read res
-res=$res""
-echo "A virtual machine is created successfully, do you want to continue? (y/n)"
-read respuesta4
-respuesta4=$respuesta4"_"
-if [ "$respuesta4" == "y_" ]; then
-	qemu-system-x86_64 -m $res -hda "$respuesta1".img -cdrom "$respuesta3" -boot d -enable-kvm
+#!/bin/bash
+
+# define some colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m'
+
+# check if qemu is installed
+if ! command -v qemu-system-x86_64 &> /dev/null; then
+  echo -e "${RED}qemu is not installed. Please install it first.${NC}"
+  exit 1
 fi
 
+# print a welcome message and instructions
+echo -e "${GREEN}Welcome to qemuguide, a simple wizard for using qemu virtual machine software.${NC}"
+echo -e "${YELLOW}Please follow the prompts and enter your choices.${NC}"
+
+# ask for the name of the virtual machine
+read -p "Enter the name of your virtual machine: " vmname
+
+# ask for the path of the disk image file or create a new one
+read -p "Enter the path of your disk image file or type 'new' to create a new one: " diskpath
+
+if [ "$diskpath" == "new" ]; then
+  # ask for the size of the disk image file
+  read -p "Enter the size of your disk image file (e.g. 10G): " disksize
+
+  # create a new disk image file using qemu-img command
+  qemu-img create -f qcow2 $vmname.qcow2 $disksize
+
+  # set the disk path to the newly created file
+  diskpath=$vmname.qcow2
+
+  # print a success message
+  echo -e "${GREEN}Created a new disk image file at $diskpath.${NC}"
+fi
+
+# ask for the path of the iso file or skip this step
+read -p "Enter the path of your iso file or type 'skip' to skip this step: " isopath
+
+if [ "$isopath" == "skip" ]; then
+  # set the iso path to an empty string
+  isopath=""
+else
+  # add the -cdrom option to the iso path
+  isopath="-cdrom $isopath"
+fi
+
+# ask for the amount of memory to allocate to the virtual machine
+read -p "Enter the amount of memory to allocate to the virtual machine in MB (e.g. 1024): " memsize
+
+# ask for the number of CPU cores to allocate to the virtual machine
+read -p "Enter the number of CPU cores to allocate to the virtual machine (e.g. 2): " cpunum
+
+# ask for the graphics mode to use for the virtual machine
+echo -e "${YELLOW}Choose the graphics mode to use for the virtual machine:${NC}"
+echo -e "${GREEN}1) SDL - Simple DirectMedia Layer, a cross-platform graphics library${NC}"
+echo -e "${GREEN}2) GTK - GIMP Toolkit, a cross-platform widget toolkit for creating graphical user interfaces${NC}"
+echo -e "${GREEN}3) VNC - Virtual Network Computing, a remote desktop protocol${NC}"
+echo -e "${GREEN}4) SPICE - Simple Protocol for Independent Computing Environments, a remote desktop protocol${NC}"
+echo -e "${GREEN}5) None - No graphics, only console output${NC}"
+
+# read the user's choice and set the graphics option accordingly
+read -p "Enter your choice (1-5): " graphics
+
+case $graphics in
+  1)
+    graphics="-display sdl"
+    ;;
+  2)
+    graphics="-display gtk"
+    ;;
+  3)
+    # ask for the VNC display number
+    read -p "Enter the VNC display number (0-99): " vncdisplay
+
+    # set the graphics option to use VNC with the given display number
+    graphics="-display vnc=:${vncdisplay}"
+    ;;
+  4)
+    # ask for the SPICE port number
+    read -p "Enter the SPICE port number (5900-5999): " spiceport
+
+    # set the graphics option to use SPICE with the given port number
+    graphics="-display spice-app --spice port=${spiceport},disable-ticketing"
+    ;;
+  5)
+    graphics="-nographic"
+    ;;
+  *)
+    # print an error message and exit
+    echo -e "${RED}Invalid choice. Please enter a number between 1 and 5.${NC}"
+    exit 1
+    ;;
+esac
+
+# print a summary of the options and confirm with the user
+echo -e "${YELLOW}Here are the options you have chosen:${NC}"
+echo -e "${GREEN}Name: $vmname${NC}"
+echo -e "${GREEN}Disk: $diskpath${NC}"
+echo -e "${GREEN}ISO: $isopath${NC}"
+echo -e "${GREEN}Memory: $memsize MB${NC}"
+echo -e "${GREEN}CPU: $cpunum cores${NC}"
+echo -e "${GREEN}Graphics: $graphics${NC}"
+
+read -p "Are you sure you want to start the virtual machine with these options? (y/n): " confirm
+
+if [ "$confirm" == "y" ]; then
+  # start the virtual machine using qemu-system-x86_64 command with the given options
+  qemu-system-x86_64 \
+    -name $vmname \
+    -hda $diskpath \
+    $isopath \
+    -m $memsize \
+    -smp $cpunum \
+    $graphics
+
+  # print a success message and exit
+  echo -e "${GREEN}The virtual machine has started. Enjoy!${NC}"
+  exit 0
+else
+  # print a goodbye message and exit
+  echo -e "${YELLOW}Okay, maybe next time. Goodbye!${NC}"
+  exit 0
+fi
