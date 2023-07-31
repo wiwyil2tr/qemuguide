@@ -1,0 +1,205 @@
+#!/bin/bash
+#!/bin/bash
+cd ~/qemu_vms
+# define some colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m'
+
+# check if qemu is installed
+if ! command -v qemu-system-x86_64 &> /dev/null; then
+  echo -e "${RED}qemu is not installed. Please install it first.${NC}"
+  exit 1
+fi
+
+# check if whiptail is installed
+if ! command -v whiptail &> /dev/null; then
+  echo -e "${RED}whiptail is not installed. Please install it first.${NC}"
+  exit 1
+fi
+
+# print a welcome message and instructions
+whiptail --msgbox "Welcome to qemuguide, a simple wizard for using qemu virtual machine software.\nPlease follow the prompts and enter your choices." 10 60 3>&1 1>&2 2>&3
+
+# ask for the name of the virtual machine using an input box
+vmname=$(whiptail --inputbox "Enter the name of your virtual machine:" 10 60 3>&1 1>&2 2>&3)
+
+# exit if the user cancels or enters nothing
+if [ $? -ne 0 ] || [ -z "$vmname" ]; then
+  whiptail --msgbox "You did not enter the name of your virtual machine. Goodbye!" 10 60 3>&1 1>&2 2>&3
+  exit 1
+fi
+
+# ask for the path of the disk image file or create a new one using a menu box
+diskpath=$(whiptail --menu "Choose an option for your disk image file:" 15 60 2 \
+"Existing" "Enter the path of your existing disk image file" \
+"New" "Create a new disk image file with a given size" \
+3>&1 1>&2 2>&3)
+
+# exit if the user cancels or enters nothing
+if [ $? -ne 0 ] || [ -z "$diskpath" ]; then
+  whiptail --msgbox "You did not choose an option for your disk image file. Goodbye!" 10 60  3>&1 1>&2 2>&3
+  exit 1
+fi
+
+if [ "$diskpath" == "Existing" ]; then
+  # ask for the path of the existing disk image file using an input box
+  diskpath=$(whiptail --inputbox "Enter the path of your existing disk image file:" 10 60 3>&1 1>&2 2>&3)
+
+elif [ "$diskpath" == "New" ]; then
+  # ask for the size of the new disk image file using an input box
+  disksize=$(whiptail --inputbox "Enter the size of your new disk image file (e.g. 10G):" 10 60 3>&1 1>&2 2>&3)
+
+  # create a new disk image file using qemu-img command
+  mkdir -p $vmname
+  cd $vmname
+  qemu-img create -f qcow2 $vmname.qcow2 $disksize
+
+  # set the disk path to the newly created file
+  diskpath=$vmname.qcow2
+
+else
+   # print an error message and exit
+   whiptail --msgbox "Invalid option. Please choose either Existing or New." 10 60 3>&1 1>&2 2>&3
+   exit 
+fi
+
+# exit if the user cancels or enters nothing
+if [ $? -ne 0 ] || [ -z "$diskpath" ]; then
+   whiptail --msgbox "You did not enter or choose a valid disk image file. Goodbye!" 3>&1 1>&2 2>&3
+   exit 
+fi
+
+# ask for the path of the iso file or skip this step using a menu box
+isopath=$(whiptail --menu "Choose an option for your iso file:" 
+15 
+60 
+2 \
+"Existing" "Enter the path of your existing iso file" \
+"Skip" "Skip this step and proceed without an iso file" \
+3>&1 
+1>&2 
+2>&3)
+# exit if the user cancels or enters nothing
+#if [ $? -ne 0 ] || [ -z "$isopath" ]; then
+#   whiptail --msgbox "You did not choose an option for your iso file. Goodbye!" 3>&1 1>&2 2>&3
+ #  exit 
+#fi
+
+if [ "$isopath" == "Existing" ]; then
+   # ask for the path of the existing iso file using an input box
+   isopath=$(whiptail --inputbox "Enter the path of your existing iso file:" 3>&1 1>&2 2>&3)
+   $isopath="-cdrom $isopath"
+elif [ "$isopath" == "Skip" ]; then
+   # set the iso path to an empty string
+   isopath=""
+else
+   # print an error message and exit
+   whiptail --msgbox "Invalid option. Please choose either Existing or Skip." 3>&1 1>&2 2>&3
+   exit 
+fi
+
+# exit if the user cancels or enters nothing
+if [ $? -ne 0 ]; then
+   whiptail --msgbox "You did not enter or choose a valid iso file. Goodbye!" 3>&1 1>&2 2>&3
+   exit 
+fi
+
+# ask for the amount of memory to allocate to the virtual machine using an input box
+memsize=$(whiptail --inputbox ("Enter the amount of memory to allocate to the virtual machine in MB (e.g. 1024):" 10 60 3>&1 1>&2 2>&3)
+
+# exit if the user cancels or enters nothing
+if [ $? -ne 0 ] || [ -z "$memsize" ]; then
+   whiptail --msgbox "You did not enter the amount of memory to allocate to the virtual machine. Goodbye!" 3>&1 1>&2 2>&3
+   exit 
+fi
+
+# ask for the number of CPU cores to allocate to the virtual machine using an input box
+cpunum=$(whiptail --inputbox ("Enter the number of CPU cores to allocate to the virtual machine (e.g. 2):" 10 60 3>&1 1>&2 2>&3)
+
+# exit if the user cancels or enters nothing
+if [ $? -ne 0 ] || [ -z "$cpunum" ]; then
+   whiptail --msgbox "You did not enter the number of CPU cores to allocate to the virtual machine. Goodbye!" 3>&1 1>&2 2>&3
+   exit
+fi
+
+# ask for the graphics mode to use for the virtual machine using a menu box
+graphics=$(whiptail --menu "Choose the graphics mode to use for the virtual machine:" 
+20 
+60 
+5 \
+"SDL" "Simple DirectMedia Layer, a cross-platform graphics library" \
+"GTK" "GIMP Toolkit, a cross-platform widget toolkit for creating graphical user interfaces" \
+"VNC" "Virtual Network Computing, a remote desktop protocol" \
+"SPICE" "Simple Protocol for Independent Computing Environments, a remote desktop protocol" \
+"None" "No graphics, only console output" \
+3>&1 
+1>&2 
+2>&3)
+
+# exit if the user cancels or enters nothing
+if [ $? -ne 0 ] || [ -z "$graphics" ]; then
+   whiptail --msgbox "You did not choose a graphics mode for the virtual machine. Goodbye!" 3>&1 1>&2 2>&3
+   exit 
+fi
+
+case $graphics in
+   (SDL
+      graphics="-display sdl"
+      ;;
+   GTK
+      graphics="-display gtk"
+      ;;
+   VNC
+      # ask for the VNC display number using an input box
+      vncdisplay=$(whiptail --inputbox "Enter the VNC display number (0-99):" 10 60 3>&1 1>&2 2>&3)
+
+      # set the graphics option to use VNC with the given display number
+      graphics="-display vnc=:${vncdisplay}"
+      ;;
+   SPICE
+      # ask for the SPICE port number using an input box
+      spiceport=$(whiptail --inputbox "Enter the SPICE port number (5900-5999):" 10 60 3>&1 1>&2 2>&3)
+
+      # set the graphics option to use SPICE with the given port number
+      graphics="-display spice-app --spice port=${spiceport},disable-ticketing"
+      ;;
+   None
+      graphics="-nographic"
+      ;;
+   *)
+      # print an error message and exit
+      whiptail --msgbox "Invalid option. Please choose one of the available graphics modes." 3>&1 1>&2 2>&3
+      exit 
+esac
+
+# exit if the user cancels or enters nothing
+if [ $? -ne 0 ]; then
+   whiptail --msgbox "You did not enter or choose a valid graphics option. Goodbye!" 3>&1 1>&2 2>&3
+   exit 
+fi
+
+# print a summary of the options and confirm with the user using a yesno box
+whiptail --yesno "Here are the options you have chosen:\nName: $vmname\nDisk: $diskpath\nISO: $isopath\nMemory: $memsize MB\nCPU: $cpunum cores\nGraphics: $graphics\nAre you sure you want to start the virtual machine with these options?" 20 60 3>&1 1>&2 2>&3
+
+# start the virtual machine using qemu-system-x86_64 command with the given options if the user confirms, otherwise exit with a goodbye message
+if [ $? -eq 0 ]; then
+      # start the virtual machine using qemu-system-x86_64 command with the given options
+   qemu-system-x86_64 \
+      -name $vmname \
+      -hda $diskpath \
+      $isopath \
+      -m $memsize \
+      -smp $cpunum \
+      $graphics
+
+   # print a success message and exit
+   whiptail --msgbox "The virtual machine has started. Enjoy!" 10 60 3>&1 1>&2 2>&3
+   exit 0
+else
+   # print a goodbye message and exit
+   whiptail --msgbox "Okay, maybe next time. Goodbye!" 10 60 3>&1 1>&2 2>&3
+   exit 0
+fi
+

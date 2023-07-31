@@ -1,30 +1,24 @@
-#!/bin/bash
-set -u
-set -e
-echo "preparing"
-#mkdir qemu_vms
-#sleep 1
-clear
-echo "Welcome to use QEMU Guide"
-echo "Please choose a task"
-echo "1. Create a new virtual machine"
-echo "2. Boot an existing virtual machine"
-echo "3. Boot a system that is on a physical device"
-echo "4. Remove a virtual machine"
-read r1
-r1=$r1"_"
-if [ "$r1" == "1_" ] ; then
-	qemuguidecreate
-	else if [ "$r1" == "2_" ] ; then
-	qemubootexisting
-	else if [ "$r1" == "3_" ] ; then
-	qemubootdisk
-    else if [ "$r1" == "4_" ] ; then
-	qemudelete
-else 
-	echo "Command not found"
-fi
-	fi
-fi
-fi
+#!/usr/bin/env bash
+#############################################
 
+QEMU_GUIDE_DIR=/usr/bin
+QEMU_GUIDE_TIPS_01="qemuguide"
+QEMU_GUIDE_TIPS_00="Welcome to qemu guide manager v2.0,type ${QEMU_GUIDE_TIPS_01} to start it."
+
+QEMU_MANAGER_MAIN_OPTION=$(
+whiptail --title "Qemu guide manager" \
+	--menu "${QEMU_GUIDE_TIPS_00}\nPlease use the touch screen or arrow keys + enter to operate." 0 50 0 \
+	"1" "🍀 Create a new virtual machine(๑•̀ㅂ•́)و✧" \
+	"2" "🌸 Boot an existing virtual machine" \
+	"3" "🌈 Boot a system that is on a physical device" \
+	"4" "💔 Remove a virtual machine" \
+	"0" "🌚 exit" \
+	3>&1 1>&2 2>&3
+)
+case "${QEMU_MANAGER_MAIN_OPTION}" in
+	0 | "") exit 0 ;;
+	1)	${QEMU_GUIDE_DIR}/qemuguidecreate ;;
+	2)	${QEMU_GUIDE_DIR}/qemubootexisting ;;
+	3)	${QEMU_GUIDE_DIR}/qemubootdisk ;;
+	4)	${QEMU_GUIDE_DIR}/qemudelete ;;
+esac

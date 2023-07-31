@@ -1,27 +1,33 @@
 #!/bin/bash
 cd ~/qemu_vms
-ls
-echo "Enter the name of the machine that you want to boot"
-read r1
-r1=$r1""
-cd $r1
-echo "do you need to boot with a ISO image(y/n)"
-read r2
-r2=$r2""
-if [ "$r2" == "y" ] ; then
-	echo "Enter the location of the ISO image"
-	read r3
-	r3=$r3""
-	echo "Enter the RAM (MB) of the virtual machine"
-	read r4
-	r4=$r4""
-	qemu-system-x86_64 -m $r4 -hda $r1.img -cdrom $r3 -boot d -enable-kvm
-else
-	echo "Enter the RAM (MB) of the virtual machine"
-	read r5
-	r5=$r5""
-	qemu-system-x86_64 -m $r5 -hda $r1.qcow2
+
+menu_options=""
+
+for item in $(ls); do
+  menu_options+="$item "
+  menu_options+="$item "
+done
+
+vm_path=$(whiptail --title "Select a machine" --menu "Select the machine that you want to boot" 20 60 10 \
+  $menu_options \
+  3>&1 1>&2 2>&3)
+
+vm_name=$(basename "$vm_path")
+cd "$vm_name"
+
+iso_needed=$(whiptail --yesno "Do you need to boot with an ISO image?" 10 60 3>&1 1>&2 2>&3)
+
+if [ $? -eq 0 ]; then
+   iso_path=$(whiptail --inputbox "Enter the location of the ISO image" 10 60 3>&1 1>&2 2>&3) 
+   ram_size=$(whiptail --inputbox "Enter the RAM of the virtual machine in MB" 10 60 3>&1 1>&2 2>&3) 
+   qemu-system-x86_64 -m "$ram_size" -hda "$vm_name.qcow2" -cdrom "$iso_path" -boot d -enable-kvm
+  
+else 
+	ram_size=$(whiptail --inputbox "Enter the RAM of the virtual machine in MB " 10 60 3>&1 1>&2 2>&3)
+    if [ $? -eq  ]; then
+    echo "No RAM size entered. Exiting." 
+    exit 
+    fi 
+    qemu-system-x86_64 -m "$ram_size" -hda "$vm_name.qcow2"  
 fi
-
-
 

@@ -1,12 +1,24 @@
 #!/bin/bash
 cd ~/qemu_vms
-echo "Enter the devicce that you want to boot from (e.g. from USB to test bootable medium)"
-read r1
-r1=$r1""
-echo "Enter the RAM of the virtual machine"
-read r2
-r2=$r2""
-qemu-system-x86_64 -m $r2 -hda $r1
-
-
+# Use whiptail to create an input box for the device
+device=$(whiptail --inputbox "Enter the device that you want to boot from (e.g. from USB to test bootable medium)" 10 60 3>&1 1>&2 2>&3)
+# Check if the user pressed cancel or entered an empty string
+if [ $? -eq 1 ] || [ -z "$device" ]; then
+  echo "No device entered. Exiting."
+  exit
+fi
+# Use whiptail to create an input box for the RAM size
+ram=$(whiptail --inputbox "Enter the RAM of the virtual machine in MB" 10 60 3>&1 1>&2 2>&3)
+# Check if the user pressed cancel or entered an empty string
+if [ $? -eq 1 ] || [ -z "$ram" ]; then
+  echo "No RAM size entered. Exiting."
+  exit
+fi
+# Check if QEMU is installed and executable
+if ! command -v qemu-system-x86_64 &> /dev/null; then
+  echo "QEMU is not installed or not in PATH"
+  exit 3
+fi
+# Run QEMU with the given options
+sudo qemu-system-x86_64 -m "$ram" -hda "$device"
 

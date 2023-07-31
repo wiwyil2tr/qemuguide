@@ -1,6 +1,6 @@
 #!/bin/bash
 #!/bin/bash
-
+clear
 # define some colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -30,6 +30,7 @@ if [ "$diskpath" == "new" ]; then
 
   # create a new disk image file using qemu-img command
   mkdir ~/qemu_vms/$vmname
+  cd  ~/qemu_vms/$vmname
   qemu-img create -f qcow2 $vmname.qcow2 $disksize
 
   # set the disk path to the newly created file

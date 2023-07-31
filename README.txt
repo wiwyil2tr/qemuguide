@@ -6,7 +6,6 @@
 运行"qemubootdisk"可以打开启动物理设备上的操作系统的向导
 运行"qemudelete"可以删除以创建的虚拟机
 
-里面的"installandcreate.mp4"是安装本软件和创建虚拟机的演示视频
-"bootfromphysicaldevice.mp4"是启动物理设备的视频
+里面的"installcreateandboot.mp4"是安装本软件和创建虚拟机, 以及从物理设备启动的的演示视频
 
 欢迎大家批评指正!

@@ -1,29 +1,25 @@
 #!/bin/bash
-set -u
-set -e
 cd ~/qemu_vms
-ls
-echo "Input the virtual machine to remove (THIS OPERATION CANNOT BE UNDONE!!!)"
-echo "Then press Enter if you really want to delete this virtual machine"
-read r1
-r1=$r1""
-read -r -p "Are You Sure? [Y/n] " input
-case $input in
-    [yY][eE][sS]|[yY])
-                rm -r $r1
-                ;;
 
-    [nN][oO]|[nN])
-                echo "No"
-        ;;
+menu_options=""
 
-    *)
-                echo "Invalid input..."
-                exit 1
-                ;;
-esac
+for item in $(ls); do
+  menu_options+="$item "
+  menu_options+="$item "
+done
 
+vm_path=$(whiptail --title "Select a machine" --menu "Select the machine that you want to remove (THIS OPERATION CANNOT BE UNDONE!!!\nThen press Enter if you really want to delete this virtual machine" 20 60 10 \
+  $menu_options \
+  3>&1 1>&2 2>&3)
 
+vm_name=$(basename "$vm_path")
 
+iso_needed=$(whiptail --yesno "Are You Sure?" 10 60 3>&1 1>&2 2>&3)
 
+if [ $? -eq 0 ]; then
+   rm -r $vm_name
+   
+else 
+	exit 0
+fi
 
