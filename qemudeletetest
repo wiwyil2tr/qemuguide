@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+#############################################
+cd ~/qemu_vms
+i=1
+menu_options=""
+
+vm_remove() {
+        vm_name=($(find $HOME/qemu_vms -maxdepth 1 ! -path $HOME/qemu_vms))
+        j="$vm_name"
+        iso_needed=$(whiptail --yesno "Are You Sure?" 10 60 3>&1 1>&2 2>&3)
+        if [ $? -eq 0 ]; then
+                rm -r ${vm_name}
+        else
+                exit 0
+        fi
+}
+
+#for item in $(find $HOME/qemu_vms -maxdepth 1 ! -path $HOME/qemu_vms); do
+for item in $(du -sh *); do
+		#menu_options+="$i "
+        menu_options+="$item "
+        let i+=1
+done
+
+menu_options+="0 "
+menu_options+="exit "
+
+vm_path=$(whiptail --title "Select a machine" \
+        --menu "Select the machine that you want to remove (THIS OPERATION CANNOT BE UNDONE!!!)\nThen press Enter if you really want to delete this virtual machine" 0 60 10 \
+        $menu_options \
+        3>&1 1>&2 2>&3)
+case "${vm_path}" in
+        0 | "") exit 0 ;;
+        *) vm_remove ;;
+esac
+

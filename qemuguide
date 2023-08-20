@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 #############################################
+ if [[ ! -d "${HOME}/qemu_vms" ]]; then
+     mkdir "${HOME}/qemu_vms"
+ fi
 
 QEMU_GUIDE_DIR=/usr/bin
 QEMU_GUIDE_TIPS_01="qemuguide"

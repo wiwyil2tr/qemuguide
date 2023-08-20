@@ -1,0 +1,45 @@
+#!/bin/bash
+cd ~/qemu_vms
+i=1
+menu_options=""
+vm_start() {
+	 vm_name=($(find $HOME/qemu_vms/ -maxdepth 1 ! -path $HOME/qemu_vms/))
+        j="$vm_name"
+
+cd "$vm_name"
+vm=("$vm_name"/*.qcow2)
+iso_needed=$(whiptail --yesno "Do you need to boot with an ISO image?" 10 60 3>&1 1>&2 2>&3)
+
+if [ $? -eq 0 ]; then
+   iso_path=$(whiptail --inputbox "Enter the location of the ISO image" 10 60 3>&1 1>&2 2>&3) 
+   ram_size=$(whiptail --inputbox "Enter the RAM of the virtual machine in MB" 10 60 3>&1 1>&2 2>&3) 
+   qemu-system-x86_64 -m "$ram_size" -hda "$vm" -cdrom "$iso_path" -boot d -enable-kvm
+  
+else 
+	ram_size=$(whiptail --inputbox "Enter the RAM of the virtual machine in MB " 10 60 3>&1 1>&2 2>&3)
+    if [ $? -eq  ]; then
+    echo "No RAM size entered. Exiting." 
+    exit 
+    fi 
+    qemu-system-x86_64 -m "$ram_size" -hda "$vm"  
+fi
+}
+#for item in $(find $HOME/qemu_vms -maxdepth 1 ! -path $HOME/qemu_vms); do
+for item in $(du -sh *); do
+                #menu_options+="$i "
+        menu_options+="$item "
+        let i+=1
+done
+
+menu_options+="0 "
+menu_options+="exit "
+
+vm_path=$(whiptail --title "Select a machine" \
+        --menu "Select the machine that you want to boot" 0 60 10 \
+        $menu_options \
+        3>&1 1>&2 2>&3)
+case "${vm_path}" in
+        0 | "") exit 0 ;;
+        *) vm_start ;;
+esac
+

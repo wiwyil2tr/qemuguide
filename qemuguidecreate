@@ -8,6 +8,10 @@ YELLOW='\033[1;33m'
 NC='\033[0m'
 
 # check if qemu is installed
+ if [[ ! -d "${HOME}/qemu_vms" ]]; then
+     mkdir ${HOME}/qemu_vms
+ fi
+
 if ! command -v qemu-system-x86_64 &> /dev/null; then
   echo -e "${RED}qemu is not installed. Please install it first.${NC}"
   exit 1

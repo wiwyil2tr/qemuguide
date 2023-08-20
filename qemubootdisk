@@ -1,4 +1,8 @@
 #!/bin/bash
+ if [[ ! -d "${HOME}/qemu_vms" ]]; then
+     mkdir ${HOME}/qemu_vms
+ fi
+
 cd ~/qemu_vms
 # Use whiptail to create an input box for the device
 device=$(whiptail --inputbox "Enter the device that you want to boot from (e.g. from USB to test bootable medium)" 10 60 3>&1 1>&2 2>&3)
